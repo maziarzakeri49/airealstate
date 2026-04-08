@@ -25,8 +25,9 @@ export default function Form({ onSubmit }: any) {
   });
 
   const inputStyle =
-    "w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition";
+    "w-full rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition text-gray-900 placeholder:text-gray-700";
 
+  
   const sectionStyle =
     "bg-white rounded-2xl shadow-sm border border-gray-300 p-4 sm:p-6 space-y-4";
 
