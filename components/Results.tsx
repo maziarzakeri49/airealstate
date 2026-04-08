@@ -50,9 +50,11 @@ export default function Results({ data }: any) {
           </button>
         </div>
 
-        <div className="bg-gray-50 rounded-xl p-4 text-sm sm:text-base leading-relaxed whitespace-pre-line border border-gray-100">
+        <div className="bg-gray-50 text-gray-900 rounded-xl p-4 text-sm sm:text-base leading-relaxed whitespace-pre-line border border-gray-100">
           {data.listing}
         </div>
+        
+        
       </div>
 
       {/* Social Posts */}
@@ -61,7 +63,7 @@ export default function Results({ data }: any) {
           <h2 className={titleStyle}>📱 Social Posts</h2>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-5 text-gray-900">
           {data.social?.map((post: string, i: number) => {
             const id = `post-${i}`;
 
@@ -103,7 +105,7 @@ export default function Results({ data }: any) {
           </button>
         </div>
 
-        <div className="bg-gray-50 rounded-xl p-4 text-sm sm:text-base leading-relaxed whitespace-pre-line border border-gray-100">
+        <div className="bg-gray-50 text-gray-900 rounded-xl p-4 text-sm sm:text-base leading-relaxed whitespace-pre-line border border-gray-100">
           {data.email}
         </div>
       </div>
