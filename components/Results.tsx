@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { ResultData } from "../types";
 
-export default function Results({ data }: any) {
+
+export default function Results({ data }: { data: ResultData }) {
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
 
   const copyToClipboard = (text: string, id: string) => {
@@ -20,13 +22,6 @@ export default function Results({ data }: any) {
   const titleStyle =
     "text-lg sm:text-xl font-semibold text-gray-800";
 
-  const copyButton = (active: boolean) =>
-    `flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg transition ${
-      active
-        ? "bg-green-100 text-green-700"
-        : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-    }`;
-
   const gradientButton = (active: boolean) =>
     `flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg text-white transition ${
       active
@@ -34,79 +29,139 @@ export default function Results({ data }: any) {
         : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
     }`;
 
+  /* ---------- PREPARE COPY TEXTS ---------- */
+
+  const listingText = `
+${data.listing.headline}
+
+${data.listing.description}
+
+Highlights:
+${data.listing.highlights.join("\n")}
+
+Features:
+${data.listing.features.join("\n")}
+  `;
+
+  const emailText = `
+Subject: ${data.email.subject}
+
+${data.email.body}
+  `;
+
   return (
     <div className="mt-8 sm:mt-10 space-y-8 max-w-4xl mx-auto">
 
-      {/* Listing */}
+      {/* 🏠 LISTING */}
       <div className={cardStyle}>
         <div className={sectionHeader}>
           <h2 className={titleStyle}>🏠 Listing</h2>
 
           <button
             className={gradientButton(copiedIndex === "listing")}
-            onClick={() => copyToClipboard(data.listing, "listing")}
+            onClick={() => copyToClipboard(listingText, "listing")}
           >
             {copiedIndex === "listing" ? "✓ Copied" : "Copy"}
           </button>
         </div>
 
-        <div className="bg-gray-50 text-gray-900 rounded-xl p-4 text-sm sm:text-base leading-relaxed whitespace-pre-line border border-gray-100">
-          {data.listing}
+        <div className="bg-gray-50 text-gray-900 rounded-xl p-4 space-y-4 border border-gray-100">
+
+          <h3 className="text-lg font-bold">
+            {data.listing.headline}
+          </h3>
+
+          <p className="text-sm sm:text-base leading-relaxed">
+            {data.listing.description}
+          </p>
+
+          <div>
+            <h4 className="font-semibold mb-1">Highlights</h4>
+            <ul className="list-disc ml-5 text-sm sm:text-base space-y-1">
+              {data.listing.highlights.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-1">Features</h4>
+            <ul className="list-disc ml-5 text-sm sm:text-base space-y-1">
+              {data.listing.features.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
         </div>
-        
-        
       </div>
 
-      {/* Social Posts */}
+      {/* 📱 SOCIAL POSTS */}
       <div className={cardStyle}>
         <div className={sectionHeader}>
           <h2 className={titleStyle}>📱 Social Posts</h2>
         </div>
 
         <div className="space-y-5 text-gray-900">
-          {data.social?.map((post: string, i: number) => {
-            const id = `post-${i}`;
+
+          {[
+            { label: "Instagram", text: data.social.instagram },
+            { label: "Facebook", text: data.social.facebook },
+            { label: "LinkedIn", text: data.social.linkedin },
+          ].map((item, i) => {
+            const id = `social-${i}`;
 
             return (
               <div
                 key={i}
                 className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-3"
               >
+                <h4 className="font-semibold">{item.label}</h4>
+
                 <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                  {post}
+                  {item.text}
                 </p>
 
                 <div className="flex justify-end">
                   <button
                     className={gradientButton(copiedIndex === id)}
-                    onClick={() => copyToClipboard(post, id)}
+                    onClick={() => copyToClipboard(item.text, id)}
                   >
                     {copiedIndex === id
                       ? "✓ Copied"
-                      : `Copy Post ${i + 1}`}
+                      : `Copy ${item.label}`}
                   </button>
                 </div>
               </div>
             );
           })}
+
         </div>
       </div>
 
-      {/* Email */}
+      {/* ✉️ EMAIL */}
       <div className={cardStyle}>
         <div className={sectionHeader}>
           <h2 className={titleStyle}>✉️ Email</h2>
 
           <button
             className={gradientButton(copiedIndex === "email")}
-            onClick={() => copyToClipboard(data.email, "email")}
+            onClick={() => copyToClipboard(emailText, "email")}
           >
             {copiedIndex === "email" ? "✓ Copied" : "Copy"}
           </button>
         </div>
 
-        <div className="bg-gray-50 text-gray-900 rounded-xl p-4 text-sm sm:text-base leading-relaxed whitespace-pre-line border border-gray-100">
-          {data.email}
+        <div className="bg-gray-50 text-gray-900 rounded-xl p-4 space-y-3 border border-gray-100">
+
+          <h3 className="font-semibold">
+            {data.email.subject}
+          </h3>
+
+          <p className="text-sm sm:text-base leading-relaxed whitespace-pre-line">
+            {data.email.body}
+          </p>
+
         </div>
       </div>
 
