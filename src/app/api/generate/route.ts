@@ -33,7 +33,7 @@ You are a professional real estate marketing expert in Toronto.
 
 Generate:
 1. A compelling MLS listing description
-2. 3 engaging Instagram captions
+2. 3 engaging for  Instagram and facebook and linkedin captions
 3. A professional email reply to a potential buyer
 
 Property Details:
@@ -60,9 +60,21 @@ Property Details:
 IMPORTANT:
 Return ONLY valid JSON in this format:
 {
-  "listing": "...",
-  "social": ["...", "...", "..."],
-  "email": "..."
+  "listing": {
+    "headline": "",
+    "description": "",
+    "highlights": [],
+    "features": []
+  },
+  "social": {
+    "instagram": "",
+    "facebook": "",
+    "linkedin": ""
+  },
+  "email": {
+    "subject": "",
+    "body": ""
+  }
 }
 `;
 

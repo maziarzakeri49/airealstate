@@ -9,7 +9,19 @@ export interface FormData {
 }
 
 export interface ResultData {
-  listing: string;
-  social: string[];
-  email: string;
+  listing: {
+    headline: string;
+    description: string;
+    highlights: string[];
+    features: string[];
+  };
+  social: {
+    instagram: string;
+    facebook: string;
+    linkedin: string;
+  };
+  email: {
+    subject: string;
+    body: string;
+  };
 }
