@@ -6,75 +6,109 @@ import { AnimatePresence, motion } from "framer-motion";
 export default function Player({
   images,
   audio,
+  duration,
 }: {
   images: File[];
   audio: File;
+  duration: number; // seconds (30, 60, etc.)
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const stopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [durationPerImage, setDurationPerImage] = useState(3);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // 🎯 Calculate duration per image
+  /* -------------------------------
+     🎯 INIT AUDIO + CALCULATE TIMING
+  --------------------------------*/
   useEffect(() => {
     const audioEl = new Audio(URL.createObjectURL(audio));
 
     audioEl.onloadedmetadata = () => {
-      const totalDuration = audioEl.duration;
-      const perImage = totalDuration / images.length;
-
+      // ✅ Use USER-SELECTED duration
+      const perImage = duration / images.length;
       setDurationPerImage(perImage);
+
       audioRef.current = audioEl;
     };
-  }, [audio, images]);
 
-  // 🎯 Sync slideshow with audio
+    return () => {
+      audioEl.pause();
+      URL.revokeObjectURL(audioEl.src);
+    };
+  }, [audio, images, duration]);
+
+  /* -------------------------------
+     🎯 SLIDESHOW SYNC
+  --------------------------------*/
   useEffect(() => {
     if (!isPlaying) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % images.length);
+      setCurrentIndex((prev) => {
+        if (prev + 1 >= images.length) return prev; // stop at last image
+        return prev + 1;
+      });
     }, durationPerImage * 1000);
 
     return () => clearInterval(interval);
   }, [isPlaying, durationPerImage, images.length]);
 
-  // 🎯 Progress tracking
+  /* -------------------------------
+     🎯 PROGRESS (based on selected duration)
+  --------------------------------*/
   useEffect(() => {
-    if (!audioRef.current) return;
+    if (!isPlaying) return;
 
-    const update = () => {
-      const current = audioRef.current!.currentTime;
-      const total = audioRef.current!.duration;
+    const startTime = Date.now();
 
-      setProgress((current / total) * 100);
-    };
+    const interval = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      const percent = Math.min((elapsed / duration) * 100, 100);
 
-    const interval = setInterval(update, 200);
+      setProgress(percent);
+    }, 200);
+
     return () => clearInterval(interval);
-  }, [isPlaying]);
+  }, [isPlaying, duration]);
 
+  /* -------------------------------
+     🎯 PLAY / PAUSE
+  --------------------------------*/
   const togglePlay = () => {
     if (!audioRef.current) return;
 
     if (isPlaying) {
       audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+      if (stopTimeoutRef.current) clearTimeout(stopTimeoutRef.current);
+      setIsPlaying(false);
+      return;
     }
 
-    setIsPlaying(!isPlaying);
+    // ▶️ Start from beginning
+    audioRef.current.currentTime = 0;
+    audioRef.current.play();
+
+    setCurrentIndex(0);
+    setProgress(0);
+    setIsPlaying(true);
+
+    // ⛔ STOP at selected duration (Option A)
+    stopTimeoutRef.current = setTimeout(() => {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+      setProgress(100);
+    }, duration * 1000);
   };
 
   return (
     <div className="mt-6 flex flex-col items-center space-y-6">
 
-      {/* 🎬 SOCIAL PREVIEW CONTAINER */}
+      {/* 🎬 SOCIAL PREVIEW */}
       <div className="w-full max-w-sm">
 
-        {/* 9:16 aspect ratio */}
         <div className="relative w-full aspect-9/16 bg-black rounded-2xl overflow-hidden shadow-xl">
 
           {/* Slideshow */}
@@ -88,15 +122,15 @@ export default function Player({
               exit={{ opacity: 0 }}
               transition={{
                 duration: 1.2,
-                ease: "easeInOut"
+                ease: "easeInOut",
               }}
             />
           </AnimatePresence>
 
-          {/* 🎛 Overlay Controls */}
-          <div className="absolute bottom-0 left-0 right-0 p-3 bg-linear-to-t from-black/70 to-transparent">
+          {/* 🎛 Controls */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 bg-lineer-to-t from-black/70 to-transparent">
 
-            {/* Progress bar */}
+            {/* Progress */}
             <div className="w-full h-1 bg-white/30 rounded mb-3">
               <div
                 className="h-1 bg-white rounded"
@@ -104,7 +138,6 @@ export default function Player({
               />
             </div>
 
-            {/* Controls */}
             <div className="flex items-center justify-between text-white">
 
               <button
@@ -120,10 +153,14 @@ export default function Player({
 
             </div>
           </div>
-
         </div>
-      </div>
 
+        {/* ⏱ Info */}
+        <div className="text-xs text-gray-500 mt-2 text-center">
+          {images.length} images • {(duration / images.length).toFixed(1)}s per image
+        </div>
+
+      </div>
     </div>
   );
 }
